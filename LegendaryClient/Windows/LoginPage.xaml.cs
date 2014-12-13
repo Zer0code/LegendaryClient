@@ -39,8 +39,9 @@ namespace LegendaryClient.Windows
         public LoginPage()
         {
             InitializeComponent();
+            Client.patching = false;
             Version.TextChanged += WaterTextbox_TextChanged;
-            if (Client.Version == "4.20.1" || Client.Version == "0.0.0")	
+            if (Client.Version == "4.20.1" || Client.Version == "0.0.0")
                 Client.Version = "4.21.14";
             bool x = Properties.Settings.Default.DarkTheme;
             if (!x)
@@ -85,13 +86,13 @@ namespace LegendaryClient.Windows
             Client.Champions = (from s in Client.SQLiteDatabase.Table<champions>()
                                 orderby s.name
                                 select s).ToList();
-            
+
             foreach (champions c in Client.Champions)
             {
                 var Source = new Uri(Path.Combine(Client.ExecutingDirectory, "Assets", "champions", c.iconPath), UriKind.Absolute);
                 c.icon = new BitmapImage(Source);
                 Debugger.Log(0, "Log", "Requesting :" + c.name + " champ");
-                
+
                 //Champions.InsertExtraChampData(c); //why was this ever here? all of the needed info is already in the sqlite file
             }
             Client.ChampionSkins = (from s in Client.SQLiteDatabase.Table<championSkins>()
@@ -147,7 +148,7 @@ namespace LegendaryClient.Windows
 
             var uriSource = new Uri(Path.Combine(Client.ExecutingDirectory, "Assets", "champions", champions.GetChampion(Client.LatestChamp).splashPath), UriKind.Absolute);
             //LoginImage.Source = new BitmapImage(uriSource);//*/
-            
+
             if (!String.IsNullOrWhiteSpace(Properties.Settings.Default.SavedPassword) &&
                 !String.IsNullOrWhiteSpace(Properties.Settings.Default.Region) &&
                 Properties.Settings.Default.AutoLogin)
@@ -155,7 +156,7 @@ namespace LegendaryClient.Windows
                 AutoLoginCheckBox.IsChecked = true;
                 LoginButton_Click(null, null);
             }
-            
+
         }
 
         void LoginPic_MediaEnded(object sender, RoutedEventArgs e)
@@ -172,8 +173,8 @@ namespace LegendaryClient.Windows
         bool PlayingSound = true;
         private void DisableSound_Click(object sender, RoutedEventArgs e)
         {
-            
-            if(PlayingSound)
+
+            if (PlayingSound)
             {
                 SoundPlayer.Pause();
                 Sound.IsChecked = true;
@@ -199,7 +200,7 @@ namespace LegendaryClient.Windows
         bool PlayingVideo = true;
         private void DisableVideo_Click(object sender, RoutedEventArgs e)
         {
-            if(PlayingVideo == true)
+            if (PlayingVideo == true)
             {
                 Video.IsChecked = true;
                 PlayingVideo = false;
@@ -219,8 +220,11 @@ namespace LegendaryClient.Windows
             Client.PVPNet = null;
             Client.PVPNet = new PVPNetConnect.PVPNetConnection();
 
+
+            if (string.IsNullOrEmpty(Properties.Settings.Default.Guid))
+                Properties.Settings.Default.Guid = Guid.NewGuid().ToString();
             Properties.Settings.Default.Save();
-            SHA1 sha =new SHA1CryptoServiceProvider();
+            SHA1 sha = new SHA1CryptoServiceProvider();
             if (RememberPasswordCheckbox.IsChecked == true)
                 Properties.Settings.Default.SavedPassword = LoginPasswordBox.Password.EncryptStringAES(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(Properties.Settings.Default.Guid)).ToString());
             else
@@ -271,8 +275,8 @@ namespace LegendaryClient.Windows
                 LoggingInLabel.Visibility = Visibility.Hidden;
                 ErrorTextBox.Text = error.Message;
             }));
-            Client.PVPNet.OnMessageReceived -= Client.OnMessageReceived;	
-            Client.PVPNet.OnError -= PVPNet_OnError;			
+            Client.PVPNet.OnMessageReceived -= Client.OnMessageReceived;
+            Client.PVPNet.OnError -= PVPNet_OnError;
             Client.PVPNet.OnLogin -= PVPNet_OnLogin;
         }
 
@@ -387,7 +391,7 @@ namespace LegendaryClient.Windows
                     Client.SwitchPage(new InGame());
                 }
                 else
-                    Client.SwitchPage(new MainPage());
+                    uiLogic.UpdateMainPage();
                 Client.ClearPage(typeof(LoginPage));
             }));
         }
@@ -408,7 +412,30 @@ namespace LegendaryClient.Windows
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             Dictionary<string, string> deserializedJSON = serializer.Deserialize<Dictionary<string, string>>(sb.ToString());
 
-            return deserializedJSON["ip_address"];
+            try
+            {
+                foreach (var x in deserializedJSON)
+                {
+                    if (x.Key.Contains("403") || x.Value.Contains("403"))
+                        throw new HttpListenerException(403);
+
+                }
+                return deserializedJSON["ip_address"];
+            }
+            catch
+            {
+                IPHostEntry host;
+                string localIP = "?";
+                host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (IPAddress ip in host.AddressList)
+                {
+                    if (ip.AddressFamily.ToString() == "InterNetwork")
+                    {
+                        localIP = ip.ToString();
+                    }
+                }
+                return localIP;
+            }
         }
 
         private Vector MoveOffset;
