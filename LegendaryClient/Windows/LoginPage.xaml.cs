@@ -39,7 +39,6 @@ namespace LegendaryClient.Windows
         public LoginPage()
         {
             InitializeComponent();
-            Client.patching = false;
             Version.TextChanged += WaterTextbox_TextChanged;
             if (Client.Version == "4.20.1" || Client.Version == "0.0.0")	
                 Client.Version = "4.21.14";
@@ -75,6 +74,9 @@ namespace LegendaryClient.Windows
                     LoginImage.Source = new BitmapImage(new Uri(Path.Combine(Client.ExecutingDirectory, "Assets", "champions", Properties.Settings.Default.LoginPageImage), UriKind.Absolute));
             }
 
+            if (String.IsNullOrEmpty(Properties.Settings.Default.Guid))
+                Properties.Settings.Default.Guid = Guid.NewGuid().ToString();
+
             Video.IsChecked = false;
 
             //Get client data after patcher completed
@@ -89,13 +91,8 @@ namespace LegendaryClient.Windows
                 var Source = new Uri(Path.Combine(Client.ExecutingDirectory, "Assets", "champions", c.iconPath), UriKind.Absolute);
                 c.icon = new BitmapImage(Source);
                 Debugger.Log(0, "Log", "Requesting :" + c.name + " champ");
-
-                try
-                {
-
-                    Champions.InsertExtraChampData(c); //why was this ever here? all of the needed info is already in the sqlite file
-                }
-                catch { Client.Log("error, file not found", "NotFound"); }
+                
+                //Champions.InsertExtraChampData(c); //why was this ever here? all of the needed info is already in the sqlite file
             }
             Client.ChampionSkins = (from s in Client.SQLiteDatabase.Table<championSkins>()
                                     orderby s.name
@@ -109,9 +106,9 @@ namespace LegendaryClient.Windows
             Client.Keybinds = (from s in Client.SQLiteDatabase.Table<keybindingEvents>()
                                orderby s.id
                                select s).ToList();
-            Client.Items = Items.PopulateItems();
-            Client.Masteries = Masteries.PopulateMasteries();
-            Client.Runes = Runes.PopulateRunes();
+            Client.Items = (from s in Client.SQLiteDatabase.Table<items>()
+                            orderby s.id
+                            select s).ToList();
 
             //Retrieve latest client version
             /*
@@ -206,12 +203,7 @@ namespace LegendaryClient.Windows
             {
                 Video.IsChecked = true;
                 PlayingVideo = false;
-                try
-                {
-
-                    LoginPic.Source = new Uri("http://eddy5641.github.io/LegendaryClient/Login/Login.png");
-                }
-                catch { }
+                LoginPic.Source = new Uri("http://eddy5641.github.io/LegendaryClient/Login/Login.png");
             }
             else
             {
@@ -226,9 +218,7 @@ namespace LegendaryClient.Windows
         {
             Client.PVPNet = null;
             Client.PVPNet = new PVPNetConnect.PVPNetConnection();
-            
-            if (string.IsNullOrEmpty(Properties.Settings.Default.Guid))
-                Properties.Settings.Default.Guid = Guid.NewGuid().ToString();
+
             Properties.Settings.Default.Save();
             SHA1 sha =new SHA1CryptoServiceProvider();
             if (RememberPasswordCheckbox.IsChecked == true)
@@ -397,7 +387,7 @@ namespace LegendaryClient.Windows
                     Client.SwitchPage(new InGame());
                 }
                 else
-                    uiLogic.UpdateMainPage();
+                    Client.SwitchPage(new MainPage());
                 Client.ClearPage(typeof(LoginPage));
             }));
         }
@@ -417,30 +407,8 @@ namespace LegendaryClient.Windows
 
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             Dictionary<string, string> deserializedJSON = serializer.Deserialize<Dictionary<string, string>>(sb.ToString());
-            try
-            {
-                foreach (var x in deserializedJSON)
-                {
-                    if (x.Key.Contains("403") || x.Value.Contains("403"))
-                        throw new HttpListenerException(403);
-                    
-                }
-                return deserializedJSON["ip_address"];
-            }
-            catch
-            {
-                IPHostEntry host;
-                string localIP = "?";
-                host = Dns.GetHostEntry(Dns.GetHostName());
-                foreach (IPAddress ip in host.AddressList)
-                {
-                    if (ip.AddressFamily.ToString() == "InterNetwork")
-                    {
-                        localIP = ip.ToString();
-                    }
-                }
-                return localIP;
-            }
+
+            return deserializedJSON["ip_address"];
         }
 
         private Vector MoveOffset;
