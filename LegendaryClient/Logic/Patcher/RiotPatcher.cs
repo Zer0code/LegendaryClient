@@ -23,7 +23,7 @@ namespace LegendaryClient.Logic.Patcher
             {
                 try
                 {
-                    dragonJson = client.DownloadString("http://ddragon.leagueoflegends.com/realms/na.js");
+                    dragonJson = client.DownloadString("http://ddragon.leagueoflegends.com/realms/pbe.js");
                 }
                 catch (Exception)
                 {
@@ -53,7 +53,7 @@ namespace LegendaryClient.Logic.Patcher
                 {
                     airVersions =
                         client.DownloadString(
-                            "http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/releaselisting_NA");
+                            "http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/releaselisting_PBE");
                 }
                 catch (WebException e)
                 {
@@ -72,7 +72,7 @@ namespace LegendaryClient.Logic.Patcher
                 {
                     gameVersions =
                         client.DownloadString(
-                            "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_NA");
+                            "http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
                 }
                 catch (WebException e)
                 {

@@ -103,12 +103,12 @@ namespace LegendaryClient.Windows
             var UpdateClient = new WebClient();
             string Package =
                 UpdateClient.DownloadString(
-                    "http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/" + latestversion[0] +
+                    "http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/" + latestversion[0] +
                     "/packages/files/packagemanifest");
             try
             {
                 UpdateClient.DownloadFile(
-                    new Uri("http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/" +
+                    new Uri("http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/" +
                             latestversion[0] + "/files/assets/data/gameStats/gameStats_en_US.sqlite"),
                     Path.Combine(Client.ExecutingDirectory, "gameStats_en_US.sqlite"));
             }
@@ -117,7 +117,7 @@ namespace LegendaryClient.Windows
                 try
                 {
                     UpdateClient.DownloadFile(
-                        new Uri("http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/" +
+                        new Uri("http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/" +
                                 latestversion[1] + "/files/assets/data/gameStats/gameStats_en_US.sqlite"),
                         Path.Combine(Client.ExecutingDirectory, "gameStats_en_US.sqlite"));
                 }
@@ -300,7 +300,7 @@ namespace LegendaryClient.Windows
                     var UpdateClient = new WebClient();
                     string Release =
                         UpdateClient.DownloadString(
-                            "http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/releaselisting_NA");
+                            "http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/releaselisting_PBE");
                     string[] LatestVersion = Release.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
                     latestversion = LatestVersion;
                     string vers = LatestVersion[0];
@@ -311,13 +311,13 @@ namespace LegendaryClient.Windows
                         {
                             string Package =
                                 UpdateClient.DownloadString(
-                                    "http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/" +
+                                    "http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/" +
                                     LatestVersion[0] + "/packages/files/packagemanifest");
                             try
                             {
                                 UpdateClient.DownloadFile(
                                     new Uri(
-                                        "http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/" +
+                                        "http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/" +
                                         LatestVersion[0] + "/files/assets/data/gameStats/gameStats_en_US.sqlite"),
                                     Path.Combine(Client.ExecutingDirectory, "Client", "gameStats_en_US.sqlite"));
                             }
@@ -366,10 +366,10 @@ namespace LegendaryClient.Windows
 
                     string LolVersion2 =
                         new WebClient().DownloadString(
-                            "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_NA");
+                            "http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
                     string LolVersion =
                         new WebClient().DownloadString(
-                            "http://l3cdn.riotgames.com/releases/live/solutions/lol_game_client_sln/releases/releaselisting_NA");
+                            "http://l3cdn.riotgames.com/releases/pbe/solutions/lol_game_client_sln/releases/releaselisting_PBE");
                     string GameClientSln = LolVersion.Split(new[] {Environment.NewLine}, StringSplitOptions.None)[0];
                     string GameClient = LolVersion2.Split(new[] {Environment.NewLine}, StringSplitOptions.None)[0];
                     LogTextBox("Latest League of Legends GameClient: " + GameClientSln);
@@ -377,7 +377,7 @@ namespace LegendaryClient.Windows
 
                     string LolLauncherVersion =
                         new WebClient().DownloadString(
-                            "http://l3cdn.riotgames.com/releases/live/projects/lol_air_client/releases/releaselisting_NA");
+                            "http://l3cdn.riotgames.com/releases/pbe/projects/lol_air_client/releases/releaselisting_PBE");
                     string LauncherVersion =
                         LolLauncherVersion.Split(new[] {Environment.NewLine}, StringSplitOptions.None)[0];
                     bool toExit = false;
@@ -436,6 +436,7 @@ namespace LegendaryClient.Windows
             {
                 var possiblePaths = new List<Tuple<string, string>>
                 {
+                    new Tuple<string, string>(@"HKEY_LOCAL_MACHINE\Software\Wow6432Node\Riot Games", "Path"),
                     new Tuple<string, string>(
                         @"HKEY_CURRENT_USER\Software\Classes\VirtualStore\MACHINE\SOFTWARE\RIOT GAMES", "Path"),
                     new Tuple<string, string>(
@@ -450,6 +451,7 @@ namespace LegendaryClient.Windows
                     // Yes, a f*ckin whitespace after "Riot Games"..
                     new Tuple<string, string>(@"HKEY_LOCAL_MACHINE\Software\Wow6432Node\Riot Games \League Of Legends",
                         "Path"),
+                    new Tuple<string, string>(@"HKEY_LOCAL_MACHINE\Software\Wow6432Node\Riot Games", "Path"),
                 };
                 foreach (var tuple in possiblePaths)
                 {
@@ -671,7 +673,7 @@ namespace LegendaryClient.Windows
             {
                 return;
             }
-            string latestVersion = "0.0.1";
+            string latestVersion = "0.0.2";
             foreach (DirectoryInfo info in subdirs)
                 latestVersion = info.Name;
 
@@ -733,7 +735,7 @@ namespace LegendaryClient.Windows
 
                 LogTextBox("Downloading " + SavePlace);
                 using (var newClient = new WebClient())
-                    newClient.DownloadFile("http://l3cdn.riotgames.com/releases/live" + Location,
+                    newClient.DownloadFile("http://l3cdn.riotgames.com/releases/pbe" + Location,
                         Path.Combine(Client.ExecutingDirectory, "RADS", "lol_game_client", SavePlace));
 
                 uncompressFile(Path.Combine(Client.ExecutingDirectory, "RADS", "lol_game_client", SavePlace),
@@ -784,7 +786,7 @@ namespace LegendaryClient.Windows
                     {
                         string SaveName = Location.Split(new[] {"/champions/"}, StringSplitOptions.None)[1];
                         LogTextBox("Downloading " + SaveName + " from http://l3cdn.riotgames.com");
-                        newClient.DownloadFile("http://l3cdn.riotgames.com/releases/live" + Location,
+                        newClient.DownloadFile("http://l3cdn.riotgames.com/releases/pbe" + Location,
                             Path.Combine(Client.ExecutingDirectory, "Assets", "champions", SaveName));
                     }
                 }
@@ -794,7 +796,7 @@ namespace LegendaryClient.Windows
                     {
                         string SaveName = Location.Split(new[] {"/abilities/"}, StringSplitOptions.None)[1];
                         LogTextBox("Downloading " + SaveName + " from http://l3cdn.riotgames.com");
-                        newClient.DownloadFile("http://l3cdn.riotgames.com/releases/live" + Location,
+                        newClient.DownloadFile("http://l3cdn.riotgames.com/releases/pbe" + Location,
                             SaveName.ToLower().Contains("passive")
                                 ? Path.Combine(Client.ExecutingDirectory, "Assets", "passive", SaveName)
                                 : Path.Combine(Client.ExecutingDirectory, "Assets", "spell", SaveName));
@@ -816,7 +818,7 @@ namespace LegendaryClient.Windows
                         {
                             string SaveName = Location.Split(new[] {"/ambient/"}, StringSplitOptions.None)[1];
                             LogTextBox("Downloading " + SaveName + " from http://l3cdn.riotgames.com");
-                            newClient.DownloadFile("http://l3cdn.riotgames.com/releases/live" + Location,
+                            newClient.DownloadFile("http://l3cdn.riotgames.com/releases/pbe" + Location,
                                 Path.Combine(Client.ExecutingDirectory, "Assets", "sounds", "ambient", SaveName));
                         }
                     }
@@ -850,7 +852,7 @@ namespace LegendaryClient.Windows
                 {
                     try
                     {
-                        newClient.DownloadFile("http://l3cdn.riotgames.com/releases/live" + Location,
+                        newClient.DownloadFile("http://l3cdn.riotgames.com/releases/pbe" + Location,
                             Path.Combine(Client.ExecutingDirectory, "RADS", "lol_game_client", SavePlace));
                     }
                     catch
@@ -875,7 +877,7 @@ namespace LegendaryClient.Windows
         {
             string LolVersion =
                 new WebClient().DownloadString(
-                    "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_NA");
+                    "http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
             string CurrentLolVersion = File.ReadAllText(Path.Combine(Client.ExecutingDirectory, "RADS", "VERSION_LOL"));
             LogTextBox("Latest version of League of Legends: " +
                        LolVersion.Split(new[] {Environment.NewLine}, StringSplitOptions.None)[0]);
